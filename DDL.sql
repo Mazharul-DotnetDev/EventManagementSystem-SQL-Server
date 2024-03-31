@@ -1,5 +1,6 @@
---Create Database using default location
+-- Create Database using default location
 USE master
+
 GO
 
 IF DB_ID ('EventManagementSystemDB') IS NOT NULL
@@ -16,13 +17,14 @@ EXECUTE ('CREATE DATABASE EventManagementSystemDB
 ON PRIMARY (NAME=EventManagementSystemDB_data, FILENAME='''+@data_path+'EventManagementSystemDB_data.mdf'', SIZE=20MB, MAXSIZE=Unlimited, FILEGROWTH=5%)
 LOG ON (NAME=EventManagementSystemDB_log, FILENAME='''+@data_path+'EventManagementSystemDB_log.ldf'', SIZE=10MB, MAXSIZE=100MB, FILEGROWTH=2MB)
 ');
+
 GO
 
 USE EventManagementSystemDB
 
 GO
 
---Alter Database to Modify size
+-- Alter Database to Modify size
 
 ALTER DATABASE EventManagementSystemDB
 
@@ -30,12 +32,12 @@ MODIFY FILE (Name=EventManagementSystemDB_data, SIZE= 25MB);
 
 GO
 
- --Schema Creation
+ -- Schema Creation
 CREATE SCHEMA ems
 
 GO
 
---Create Tables 
+-- Create Multiple Tables 
 
 USE EventManagementSystemDB
 
@@ -175,7 +177,7 @@ CREATE TABLE ems.Payments (
 
 GO
 
---Local & global temporary table
+-- Create Local & Global temporary tables
 
 CREATE TABLE #EventWaitlist (
     WaitlistID int IDENTITY(1,1) PRIMARY KEY,
@@ -200,15 +202,15 @@ CREATE TABLE ##EventSessionFeedback (
 
 GO
 
---Drop Local Temporary table
+-- Drop Local Temporary table
 DROP TABLE #EventWaitlist
 
---Drop Global Temporary table
+-- Drop Global Temporary table
 DROP TABLE ##EventSessionFeedback
 
 GO
 
---Alter table:add and drop column
+-- Alter table: adding and dropping column
 
 ALTER TABLE ems.Events
 ADD EventCategory varchar(50) NULL; 
@@ -218,7 +220,7 @@ DROP COLUMN EventCategory;
 
 GO
 
---Created Clustered Index and NonClustered Index
+-- Created Clustered Index and NonClustered Index
 
 CREATE CLUSTERED INDEX IX_Payments_PaymentID ON ems.Payments (PaymentID);
 
@@ -228,7 +230,7 @@ GO
 
 USE EventManagementSystemDB
 
---Create sequence
+-- Create a sequence
 
 -- Created on Tickets Table
 CREATE SEQUENCE TicketIDSequence
@@ -240,7 +242,7 @@ CREATE SEQUENCE TicketIDSequence
 
 GO
 
---Create View 
+-- Create View 
 
 CREATE VIEW vwEventDetails
 AS
@@ -275,7 +277,7 @@ LEFT JOIN
 
 GO
 
---Create View With Encryption
+-- Create a View With Encryption
 
 CREATE VIEW EncryptedPaymentDetails
 WITH ENCRYPTION
@@ -295,9 +297,7 @@ INNER JOIN ems.Events e ON r.EventID = e.EventID
 
 GO
 
---Create Procedure
-
---Transaction(Commit, Rollback, Try, Catch) with Procedure
+--Create a Transaction (Commit, Rollback, Try, Catch) with Stored-Procedure
 
 CREATE PROCEDURE RegisterUserForEvent 
 (
@@ -327,14 +327,14 @@ BEGIN
   END TRY
   BEGIN CATCH 
     ROLLBACK TRANSACTION; 
-    RAISERROR ('Registration failed.', 16, 1); 
+    RAISERROR ('Registration failed. This is a CUSTOMIZED ERROR from the Developer for Testing purpose', 16, 1); 
   END CATCH
 END;
 
 
 GO
 
---Create After Trigger
+-- Create After Trigger
 
 CREATE TRIGGER UpdateTicketSoldQuantity
 ON ems.Registrations
@@ -351,7 +351,7 @@ END
 
 GO
 
---Create Instead Of Trigger For Setting Limit of 1 Row Update and Delete at a time
+-- Create Instead Of Trigger For Setting Limit of 1 Row Update and Delete at a time
 
 CREATE TRIGGER PreventDuplicateRegistrations
 ON ems.Registrations
@@ -391,7 +391,7 @@ END
 
 GO
 
---Create Tabular Function
+-- Create Tabular Function
 
 CREATE FUNCTION GetUserUpcomingRegistrations (@UserID INT)
 RETURNS TABLE
@@ -412,7 +412,7 @@ RETURN (
 
 GO
 
---Create Scalar Function
+-- Create Scalar Function
 
 CREATE FUNCTION CalculateUserTotalSpent
 (
