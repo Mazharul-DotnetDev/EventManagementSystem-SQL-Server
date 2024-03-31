@@ -1,5 +1,8 @@
 USE EventManagementSystemDB
+
 GO
+
+-- Insert values into Users table
 
 INSERT INTO ems.Users (FirstName, LastName, Email, MobileNo, UserType, RegistrationDate, LastLogin, IsActive)
 VALUES
@@ -17,6 +20,7 @@ SELECT * FROM ems.Users
 GO
 
 -- Insert sample event data rows 
+
 INSERT INTO ems.Events (EventName, EventDescription, StartDate, EndDate, Venue, UserID)
 VALUES ('Software Development Conference', 'A gathering of developers to share knowledge and experiences.', GETDATE(), DATEADD(day, 2, GETDATE()), 'Grand Convention Center', 1);  
 
@@ -51,12 +55,16 @@ VALUES
 
 GO
 
+-- Insert values into Registrations table
+
 INSERT INTO ems.Registrations (EventID, UserID, TicketID, RegistrationDate)
 VALUES
 (1, 1, 1, SYSUTCDATETIME()), 
 (2, 2, 2, SYSUTCDATETIME()); 
 
 GO
+
+-- Insert values into Speakers table
 
 INSERT INTO ems.Speakers (SpeakerName, SpeakerBio, SpeakerPhoto, IsActive, CreatedDate)
 VALUES
@@ -65,12 +73,16 @@ VALUES
 
 GO
 
+-- Insert values into EventSpeakers table
+
 INSERT INTO ems.EventSpeakers (EventID, SpeakerID)
 VALUES
 (1, 1), 
 (2, 2); 
 
 GO
+
+-- Insert values into Sponsors table
 
 INSERT INTO ems.Sponsors (SponsorName, WebsiteURL)
 VALUES
@@ -79,12 +91,16 @@ VALUES
 
 GO
 
+-- Insert values into EventSponsors table
+
 INSERT INTO ems.EventSponsors (EventID, SponsorID)
 VALUES
 (1, 1), 
 (2, 2); 
 
 GO
+
+-- Insert values into Payments table
 
 INSERT INTO ems.Payments (UserID, Amount, PaymentDate, PaymentMethod, TransactionID)
 VALUES
@@ -93,7 +109,7 @@ VALUES
 
 GO
 
---Update
+-- Update
 
 UPDATE [EventManagementSystemDB].[ems].[Users]
 SET Email = 'newemail@example.com',
@@ -102,12 +118,14 @@ WHERE UserID = 1;
 
 GO
 
---Delete
+-- Delete
 
 DELETE FROM [EventManagementSystemDB].[ems].[Users]
 WHERE UserID = 6;
 
 GO
+
+-- Distinct
 
 SELECT DISTINCT FirstName, LastName
 FROM [EventManagementSystemDB].[ems].[Users];
@@ -115,6 +133,7 @@ FROM [EventManagementSystemDB].[ems].[Users];
 GO
 
 --Insert Into Copy Data From Another Table
+
 SELECT * 
 INTO #tempPayment
 FROM ems.Payments
@@ -125,10 +144,12 @@ SELECT * FROM #tempPayment
 
 GO
 
---Truncate table
+-- Truncate table
 TRUNCATE TABLE #tempPayment
 
 GO
+
+-- Cross Join
 
 SELECT *
 FROM ems.Users
@@ -136,12 +157,16 @@ CROSS JOIN ems.Events;
 
 GO
 
+-- Self Join
+
 SELECT u1.UserID AS UserID1, u1.FirstName AS FirstName1, u1.LastName AS LastName1,
        u2.UserID AS UserID2, u2.FirstName AS FirstName2, u2.LastName AS LastName2
 FROM ems.Users u1
 JOIN ems.Users u2 ON u1.UserID <> u2.UserID;
 
 GO
+
+-- Group By & Having
 
 SELECT UserType, COUNT(UserID) AS UserCount
 FROM ems.Users
@@ -151,11 +176,15 @@ HAVING COUNT(UserID) > 1;
 
 GO
 
+-- SubQuery
+
 SELECT PaymentID, UserID, Amount, PaymentDate, PaymentMethod, TransactionID
 FROM ems.Payments
 WHERE UserID IN (SELECT UserID FROM ems.Users WHERE UserType = 'Organizer');
 
 GO
+
+-- Union
 
 SELECT UserID, NULL AS FirstName, NULL AS LastName, Email, NULL AS MobileNo
 FROM ems.Users
@@ -165,6 +194,8 @@ FROM ems.Payments;
 
 GO
 
+-- Union All
+
 SELECT UserID, NULL AS FirstName, NULL AS LastName, Email, NULL AS MobileNo
 FROM ems.Users
 UNION ALL
@@ -172,6 +203,8 @@ SELECT UserID, Amount, PaymentDate, PaymentMethod, TransactionID
 FROM ems.Payments;
 
 GO
+
+-- CTE
 
 WITH UpcomingRegistrations AS (
   SELECT  
@@ -193,10 +226,11 @@ FROM UpcomingRegistrations;
 
 GO
 
+-- Execute the Stored- Procedure
+
 EXEC RegisterUserForEvent @UserID = 1, @EventID = 1;
 
 GO
-
 
 SELECT * FROM dbo.GetUserUpcomingRegistrations(2);
 
@@ -213,6 +247,7 @@ SELECT @TotalSpent AS TotalSpent;
 GO
 
 --Mathematical Operator
+
 SELECT 10+2 as [Sum]
 GO
 SELECT 10-2 as [Substraction]
@@ -225,6 +260,7 @@ SELECT 10%3 as [Remainder]
 GO
 
 --Cast, Convert, Concatenation
+
 SELECT 'Today : ' + CAST(GETDATE() as varchar)
 Go
 
@@ -238,16 +274,22 @@ GO
 
 --Isdate
 SELECT ISDATE('2030-05-21')
+
 --Datepart
 SELECT DATEPART(MONTH,'2030-05-21')
+
 --Datename
 SELECT DATENAME(MONTH,'2030-05-21')
+
 --Sysdatetime
 SELECT Sysdatetime()
+
 --UTC
 SELECT GETUTCDATE()
 
 GO
+
+-- DATEDIFF
 
 SELECT UserID, FirstName, LastName, 
   DATEDIFF(day, RegistrationDate, GETUTCDATE()) AS DaysSinceRegistered
@@ -256,11 +298,15 @@ WHERE UserType = 'Attendee';
 
 GO
 
+-- ROLLUP
+
 SELECT YEAR(RegistrationDate), MONTH(RegistrationDate) AS Month, COUNT(*) AS RegistrationsPerMonth
 FROM ems.Registrations
 GROUP BY YEAR(RegistrationDate), MONTH(RegistrationDate) WITH ROLLUP;
 
 GO
+
+-- GROUPING SETS
 
 SELECT UserType, RegistrationDate, COUNT(*) AS RegistrationsByTypeAndDate
 FROM ems.Users
@@ -268,11 +314,15 @@ GROUP BY GROUPING SETS ((UserType), (RegistrationDate), (UserType, RegistrationD
 
 GO
 
+-- CASE
+
 SELECT UserID, FirstName, LastName,
   CASE UserType WHEN 'Organizer' THEN 'Event Organizer' ELSE 'Attendee' END AS UserTypeName
 FROM ems.Users;
 
 GO
+
+-- Between & And
 
 SELECT EventName, StartDate, EndDate
 FROM ems.Events
@@ -285,6 +335,8 @@ FROM ems.Users
 WHERE UserType = 'Attendee' AND RegistrationDate > '2024-03-01';
 
 GO
+
+-- Wild-Card
 
 SELECT EventName, SpeakerName
 FROM ems.Events e
@@ -333,6 +385,8 @@ WHERE EventName LIKE 'Market%';
 
 GO
 
+-- While Loop
+
 DECLARE @Counter INT = 1;
 WHILE @Counter <= 10
 BEGIN
@@ -342,6 +396,8 @@ END;
 
 GO
 
+-- IIF
+
 SELECT EventName,
        StartDate,
        IIF(CONVERT(DATE, StartDate) = CONVERT(DATE, GETDATE()), 'Today', 'Not Today') AS StartDateStatus
@@ -349,12 +405,16 @@ FROM ems.Events;
 
 GO
 
+-- CHOOSE
+
 SELECT EventName,
        EndDate,
        CHOOSE(MONTH(EndDate), 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December') AS EndMonth
 FROM ems.Events;
 
 GO
+
+-- ISNULL
 
 SELECT EventName,
        ISNULL(EventDescription, 'No Description Available') AS EventDescription
@@ -378,6 +438,8 @@ WHERE
 
 GO
 
+-- COALESCE
+
 SELECT 
     UserID, 
     COALESCE(Email, 'Email not provided') AS UserEmail
@@ -385,6 +447,8 @@ FROM
     ems.Users;
 
 GO
+
+-- RANK, DENSE_RANK
 
 SELECT 
     UserID,
@@ -398,6 +462,8 @@ FROM
 
 GO
 
+-- Aggregate Functions
+
 SELECT 
     UserID,
     Amount,
@@ -409,6 +475,8 @@ FROM
     ems.Payments;
 
 GO
+
+-- CEILING, FLOOR, ROUND
 
 SELECT 
     TicketType,
@@ -432,7 +500,8 @@ GROUP BY
 
 GO
 
--- Show events where the organizer is an active user
+-- EXISTS
+
 SELECT EventName, e.UserID
 FROM ems.Events e
 WHERE EXISTS (
@@ -452,4 +521,3 @@ FROM
 
 
 GO
-
